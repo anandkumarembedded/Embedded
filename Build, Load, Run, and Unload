@@ -1,0 +1,32 @@
+1️⃣ Build the Kernel Module (.ko)
+make
+Generates:
+    gpio_ctrl.ko → Loadable kernel object
+    Intermediate build files (.o, .mod.c, etc.)
+2️⃣ Load the Kernel Module
+sudo insmod gpio_ctrl.ko
+What happens?
+    Inserts the module into the kernel
+    Executes gpio_init() function
+    Allocates major/minor number
+3️⃣ Compile User-Space Application
+gcc -o user user.c
+What happens?
+    Compiles the menu-driven user application
+    Produces executable:user
+4️⃣ Run the User Application
+sudo ./user
+What you can do:
+    Turn LED ON/OFF
+    Select GPIO pins
+    Read button press count
+    Test blocking read
+5️⃣ Unload the Kernel Module
+sudo rmmod gpio_ctrl
+What happens?
+    Frees IRQs
+    Releases GPIOs
+    Removes /dev/gpio_ctrl
+    Cleans up kernel resources
+
+Reset counters
