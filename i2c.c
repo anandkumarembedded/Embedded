@@ -77,27 +77,31 @@ static int bmpdr_read_calibration(struct i2c_client *client,
                                   struct bmp280_calib *c)
 {
     u8 buf[24];
+    int ret, i;
+
     for (i = 0; i < 3; i++) {
         ret = i2c_smbus_read_i2c_block_data(client, 0x88, 24, buf);
+        if (ret >= 0)
             break;
+        msleep(10);
     }
+    if (ret < 0)
         return ret;
+
     c->dig_T1 = (buf[1] << 8) | buf[0];
     c->dig_T2 = (s16)((buf[3] << 8) | buf[2]);
+    c->dig_T3 = (s16)((buf[5] << 8) | buf[4]);
     c->dig_P1 = (buf[7] << 8) | buf[6];
+    c->dig_P2 = (s16)((buf[9] << 8) | buf[8]);
     c->dig_P3 = (s16)((buf[11] << 8) | buf[10]);
+    c->dig_P4 = (s16)((buf[13] << 8) | buf[12]);
+    c->dig_P5 = (s16)((buf[15] << 8) | buf[14]);
     c->dig_P6 = (s16)((buf[17] << 8) | buf[16]);
+    c->dig_P7 = (s16)((buf[19] << 8) | buf[18]);
     c->dig_P8 = (s16)((buf[21] << 8) | buf[20]);
     c->dig_P9 = (s16)((buf[23] << 8) | buf[22]);
 
     return 0;
-}
-{
-    int32_t var1, var2;
-            ((int32_t)d->calib.dig_T2)) >> 11;
-            ((int32_t)d->calib.dig_T3)) >> 14;
-    d->t_fine = var1 + var2;
-    return (d->t_fine * 5 + 128) >> 8;
 }
 /* ---------------- Compensation ---------------- */
 static int32_t bmpdr_compensate_temp(struct bmpdr_data *d, int32_t adc_T)
@@ -111,6 +115,7 @@ static int32_t bmpdr_compensate_temp(struct bmpdr_data *d, int32_t adc_T)
     d->t_fine = var1 + var2;
     return (d->t_fine * 5 + 128) >> 8;
 }
+
 static uint32_t bmpdr_compensate_pressure(struct bmpdr_data *d, int32_t adc_P)
 {
     int64_t var1, var2, p;
