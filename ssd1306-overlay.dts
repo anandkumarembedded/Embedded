@@ -1,0 +1,11 @@
+/dts-v1/;
+/plugin/;
+&i2c1{
+    #address-cells = <1>;
+    #size-cells = <0>;
+    status = "okay";
+    ssd1306@3c {
+        compatible = "ssd1306";
+        reg = <0x3c>;
+    };
+};
