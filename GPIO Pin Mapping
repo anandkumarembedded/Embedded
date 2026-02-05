@@ -1,0 +1,5 @@
+GPIO Pin Mapping
+| Component   | GPIO (Linux)        | BCM GPIO    | Direction | Wiring                      |
+| ----------- | ------------------- | ----------- | --------- | --------------------------- |
+| Push Button | GPIO 539            | BCM 27      | Input     | GPIO ↔ GND                  |
+| LED 1       | GPIO 540            | BCM 18      | Output    | GPIO →  LED → GND           |
