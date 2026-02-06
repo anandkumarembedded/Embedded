@@ -1,0 +1,17 @@
+Commands :-
+
+	-> nano Custom_Driver.c
+	-> nano Makefile
+	-> make 
+ its already loaded remove it with 
+   -> sudo rmmod Custom_Driver
+   -> sudo insmod Custom_Driver.ko    
+	 -> sudo chmod 666 /dev/rpi_loopback
+	 -> ls -l /dev/rpi_loopback
+	Check it module is loaded or not with
+	 -> dmesg | tail -20
+
+After Succefully loaded Module 
+	-> nano User_app.c
+	-> gcc User_app.c -o User_app
+	-> sudo ./	User_app

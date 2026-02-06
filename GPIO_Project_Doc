@@ -1,0 +1,108 @@
+GPIO, Interrupt & Character Device Driver Framework
+Raspberry Pi 4 – Kernel ↔ Userspace GPIO Control
+________________________________________
+Overview
+This project implements a custom Linux character device driver on Raspberry Pi 4 to control GPIO-based hardware (LEDs and push buttons) using interrupts.
+The driver exposes GPIO control to user space via /dev/gpio_ctrl and supports:
+•	Blocking read() on button events
+•	poll() / select() support
+•	ioctl() for configuration and status
+•	Software debounce
+•	Dynamic GPIO selection
+The accompanying user-space application demonstrates how applications interact with the driver.
+________________________________________
+Hardware Required
+•	Raspberry Pi 4
+•	LEDs (2–3)
+•	Push buttons (2)
+•	Breadboard & jumper wires
+________________________________________
+Learning Objectives
+•	Linux kernel module basics
+•	Character device driver framework
+•	GPIO configuration in kernel space
+•	Interrupt handling (ISR)
+•	Debounce logic
+•	User ↔ Kernel communication (read, write, ioctl, poll)
+________________________________________
+Architecture
+User App  ── open/read/write/ioctl/poll ──>  /dev/gpio_ctrl
+                                                     |
+                                                     v
+                                      Custom Kernel Module
+                                      - GPIO configuration
+                                      - IRQ handlers for buttons
+                                      - Debounce
+                                      - Wait queues
+•	Buttons generate hardware interrupts.
+•	ISR increments a counter and wakes blocked readers.
+•	read() blocks until a button press occurs.
+•	ioctl() configures GPIO and reads state.
+•	write() controls output GPIO (LED).
+________________________________________
+Functional Mapping
+Feature	Implemented In Driver
+Character device creation	alloc_chrdev_region, cdev_add, class_create
+GPIO configuration	gpio_request, gpio_direction_*
+Interrupt handling	request_irq, ISR
+Debounce	jiffies-based filter
+Blocking read	wait_event_interruptible
+Poll/select	.poll + waitqueue
+User-kernel copy	copy_to_user, copy_from_user
+IOCTL interface	unlocked_ioctl
+________________________________________
+
+GPIO Wiring (Example)
+•	LED:
+•	GPIO (BCM) ──── LED Anode
+•	                       LED Cathode ── GND
+•	Button (Active-Low):
+•	GPIO (BCM) ── Button ── VCC
+
+The driver already configures two button GPIOs:
+gpio_request(539, "BTN1");  // BCM27
+gpio_request(540, "BTN2");  // BCM28 
+________________________________________
+Build & Run
+Kernel Module:
+make
+sudo insmod gpio_ctrl.ko
+dmesg | tail
+ls -l /dev/gpio_ctrl
+Unload:
+sudo rmmod gpio_ctrl
+User Application
+gcc user_app.c -o user_app
+sudo ./user_app
+________________________________________
+User Application Menu
+1. Set GPIO
+2. Set Direction
+3. LED ON
+4. LED OFF
+5. Read GPIO
+6. Blocking Read Button
+7. Reset Counter
+0. Exit
+•	Set GPIO: Select which GPIO the driver controls
+•	Set Direction: Configure as input/output
+•	LED ON/OFF: Write to GPIO
+•	Read GPIO: Read current GPIO value
+•	Blocking Read Button: Wait until a button interrupt occurs
+•	Reset Counter: Clear press count
+________________________________________
+Deliverables
+•	Loadable kernel module (gpio_ctrl.ko)
+•	User-space test application (user_app)
+•	GPIO wiring reference
+•	This README
+________________________________________
+Key Kernel APIs Used
+•	gpio_request(), gpio_direction_output(), gpio_direction_input()
+•	request_irq(), free_irq()
+•	wait_event_interruptible()
+•	copy_to_user(), copy_from_user()
+•	cdev_init(), class_create(), device_create()
+________________________________________
+This project mirrors how real embedded Linux drivers are structured:
+event-driven hardware, deterministic kernel behaviour, and clean user-space control.
